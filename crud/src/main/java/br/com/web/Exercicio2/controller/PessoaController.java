@@ -1,9 +1,6 @@
 package br.com.web.Exercicio2.controller;
 
-import br.com.web.Exercicio2.entities.Pessoa.DadosAtualizacaoPessoa;
-import br.com.web.Exercicio2.entities.Pessoa.DadosCadastroPessoa;
-import br.com.web.Exercicio2.entities.Pessoa.DadosListagemPessoa;
-import br.com.web.Exercicio2.entities.Pessoa.Pessoa;
+import br.com.web.Exercicio2.entities.Pessoa.*;
 import br.com.web.Exercicio2.repository.PessoaRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -13,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
@@ -28,8 +26,11 @@ public class PessoaController {
 
     @PostMapping
     @Transactional
-    public void create(@RequestBody @Valid DadosCadastroPessoa dados){
-        repository.save(new Pessoa(dados));
+    public ResponseEntity<DadosDetalhamentoPessoa> create(@RequestBody @Valid DadosCadastroPessoa dados, UriComponentsBuilder uriBuilder){
+        var pessoa = new Pessoa(dados);
+        repository.save(pessoa);
+        var uri = uriBuilder.path("/pessoas/{id}").buildAndExpand(pessoa.getId()).toUri();
+        return ResponseEntity.created(uri).body(new DadosDetalhamentoPessoa(pessoa));
     }
     @GetMapping("/findAll")
     public List<Pessoa> findAll(){
